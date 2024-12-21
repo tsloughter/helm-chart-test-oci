@@ -23,7 +23,7 @@ jobs:
         run: helm dependency update
 
       - name: Package Chart
-        run: helm package --version ${{ env.GITHUB_REF_NAME }} .
+        run: helm package --version ${{ github.ref_name }} .
 
 
       - name: Login to GitHub Container Registry
@@ -34,4 +34,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Chart
-        run: helm push helm-chart-test-oci-${{ env.GITHUB_REF_NAME }}.tgz "oci://ghcr.io/tsloughter/helm-chart-test-oci"
+        run: helm push helm-chart-test-oci-${{ github.ref_name }}.tgz "oci://ghcr.io/tsloughter/helm-chart-test-oci"
