@@ -1,0 +1,39 @@
+name: Push New Helm Chart Version
+
+on:
+  push:
+    tags: ['*']
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+
+      - name: Update Dependencies
+        run: helm dependency update
+
+      - name: Package Chart
+        run: helm package --version {{ github.ref_name }} .
+
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Chart
+        run: helm push helm-chart-test-oci-{{ github.ref_name }}.tgz "oci://ghcr.io/tsloughter/helm-chart-test-oci"
